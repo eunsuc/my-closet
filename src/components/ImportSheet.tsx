@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { CategoryPicker } from './CategoryPicker'
+import { ColorPicker } from './ColorPicker'
 import { ImageCropper, type ImageCropperHandle } from './ImageCropper'
 import { addItem } from '../lib/repo'
 import type { Category } from '../types'
@@ -9,6 +10,7 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
   const [name, setName] = useState('')
   const [purchasedFrom, setPurchasedFrom] = useState('')
   const [price, setPrice] = useState('')
+  const [color, setColor] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const cropperRef = useRef<ImageCropperHandle>(null)
 
@@ -16,7 +18,14 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
     if (!category || saving) return
     setSaving(true)
     const croppedImage = (await cropperRef.current?.getCroppedBlob()) ?? image
-    await addItem(croppedImage, category, name, purchasedFrom, price ? Number(price) : undefined)
+    await addItem(
+      croppedImage,
+      category,
+      name,
+      purchasedFrom,
+      price ? Number(price) : undefined,
+      color ?? undefined,
+    )
     setSaving(false)
     onClose()
   }
@@ -46,6 +55,7 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
           value={price}
           onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ''))}
         />
+        <ColorPicker image={image} color={color} onChange={setColor} />
         <button className="btn" disabled={!category || saving} onClick={handleSave}>
           {saving ? 'Saving…' : 'Save'}
         </button>

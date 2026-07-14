@@ -5,6 +5,7 @@ import { useBlobUrl } from '../hooks/useBlobUrl'
 import { ImportSheet } from '../components/ImportSheet'
 import { ItemDetailSheet } from '../components/ItemDetailSheet'
 import { HangerIcon } from '../components/icons'
+import { hexToHue } from '../lib/color'
 import type { Category, Item } from '../types'
 
 const FILTERS: { value: Category | 'all'; label: string }[] = [
@@ -17,6 +18,8 @@ const FILTERS: { value: Category | 'all'; label: string }[] = [
   { value: 'bag', label: 'Bags' },
 ]
 
+type SortMode = 'newest' | 'color'
+
 function ItemThumb({ item, onClick }: { item: Item; onClick: () => void }) {
   const url = useBlobUrl(item.thumbnail)
   return (
@@ -28,14 +31,23 @@ function ItemThumb({ item, onClick }: { item: Item; onClick: () => void }) {
 
 export default function Closet() {
   const [filter, setFilter] = useState<Category | 'all'>('all')
+  const [sort, setSort] = useState<SortMode>('newest')
   const [pendingImage, setPendingImage] = useState<Blob | null>(null)
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const items = useLiveQuery(async () => {
     const all = await db.items.orderBy('createdAt').reverse().toArray()
-    return filter === 'all' ? all : all.filter((i) => i.category === filter)
-  }, [filter])
+    const filtered = filter === 'all' ? all : all.filter((i) => i.category === filter)
+    if (sort === 'color') {
+      return [...filtered].sort((a, b) => {
+        const hueA = a.color ? hexToHue(a.color) : -2
+        const hueB = b.color ? hexToHue(b.color) : -2
+        return hueA - hueB
+      })
+    }
+    return filtered
+  }, [filter, sort])
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -57,6 +69,20 @@ export default function Closet() {
               {f.label}
             </button>
           ))}
+        </div>
+        <div className="mode-toggle" style={{ marginTop: 10 }}>
+          <button
+            className={'mode-toggle-btn' + (sort === 'newest' ? ' active' : '')}
+            onClick={() => setSort('newest')}
+          >
+            Newest
+          </button>
+          <button
+            className={'mode-toggle-btn' + (sort === 'color' ? ' active' : '')}
+            onClick={() => setSort('color')}
+          >
+            Color
+          </button>
         </div>
       </div>
 

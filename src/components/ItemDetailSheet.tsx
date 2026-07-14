@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useBlobUrl } from '../hooks/useBlobUrl'
 import { CategoryPicker } from './CategoryPicker'
+import { ColorPicker } from './ColorPicker'
 import { ImageCropper, type ImageCropperHandle } from './ImageCropper'
 import { updateItem, deleteItem, recropItem } from '../lib/repo'
 import type { Item } from '../types'
@@ -10,6 +11,7 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
   const [name, setName] = useState(item.name ?? '')
   const [purchasedFrom, setPurchasedFrom] = useState(item.purchasedFrom ?? '')
   const [price, setPrice] = useState(item.price !== undefined ? String(item.price) : '')
+  const [color, setColor] = useState<string | null>(item.color ?? null)
   const [currentImage, setCurrentImage] = useState(item.image)
   const [recropping, setRecropping] = useState(false)
   const [savingCrop, setSavingCrop] = useState(false)
@@ -31,6 +33,11 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
 
   async function handlePriceBlur() {
     await updateItem(item.id, { price: price ? Number(price) : undefined })
+  }
+
+  async function handleColorChange(hex: string) {
+    setColor(hex)
+    await updateItem(item.id, { color: hex })
   }
 
   async function handleDelete() {
@@ -94,6 +101,7 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
               onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ''))}
               onBlur={handlePriceBlur}
             />
+            <ColorPicker image={currentImage} color={color} onChange={handleColorChange} />
             <button className="btn danger" onClick={handleDelete}>
               Delete
             </button>

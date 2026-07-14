@@ -9,6 +9,7 @@ export async function addItem(
   name?: string,
   purchasedFrom?: string,
   price?: number,
+  color?: string,
 ): Promise<Item> {
   const thumbnail = await makeThumbnail(image)
   const item: Item = {
@@ -19,6 +20,7 @@ export async function addItem(
     name: name?.trim() || undefined,
     purchasedFrom: purchasedFrom?.trim() || undefined,
     price: price !== undefined && !Number.isNaN(price) ? price : undefined,
+    color,
     createdAt: Date.now(),
   }
   await db.items.add(item)
@@ -27,7 +29,7 @@ export async function addItem(
 
 export async function updateItem(
   id: string,
-  updates: Partial<Pick<Item, 'category' | 'name' | 'purchasedFrom' | 'price'>>,
+  updates: Partial<Pick<Item, 'category' | 'name' | 'purchasedFrom' | 'price' | 'color'>>,
 ) {
   await db.items.update(id, updates)
 }

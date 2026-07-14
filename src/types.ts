@@ -8,6 +8,7 @@ export interface Item {
   name?: string
   purchasedFrom?: string
   price?: number
+  color?: string
   createdAt: number
 }
 
