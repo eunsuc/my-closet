@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createPackingList } from '../lib/repo'
+import { createWardrobe } from '../lib/repo'
 
-export function NewPackingListSheet({ onClose }: { onClose: () => void }) {
+export function NewWardrobeSheet({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
   const navigate = useNavigate()
@@ -10,19 +10,19 @@ export function NewPackingListSheet({ onClose }: { onClose: () => void }) {
   async function handleCreate() {
     if (saving) return
     setSaving(true)
-    const list = await createPackingList(name)
+    const wardrobe = await createWardrobe(name)
     setSaving(false)
     onClose()
-    navigate(`/packing/${list.id}`)
+    navigate(`/wardrobes/${wardrobe.id}`)
   }
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="sheet-title">New packing list</div>
+        <div className="sheet-title">New wardrobe</div>
         <input
           className="text-input"
-          placeholder="Trip name (e.g. Tokyo)"
+          placeholder='Name (e.g. "To Sell", "Brisbane")'
           value={name}
           onChange={(e) => setName(e.target.value)}
           autoFocus

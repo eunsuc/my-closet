@@ -9,6 +9,7 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
   const [category, setCategory] = useState(item.category)
   const [name, setName] = useState(item.name ?? '')
   const [purchasedFrom, setPurchasedFrom] = useState(item.purchasedFrom ?? '')
+  const [price, setPrice] = useState(item.price !== undefined ? String(item.price) : '')
   const [currentImage, setCurrentImage] = useState(item.image)
   const [recropping, setRecropping] = useState(false)
   const [savingCrop, setSavingCrop] = useState(false)
@@ -26,6 +27,10 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
 
   async function handlePurchasedFromBlur() {
     await updateItem(item.id, { purchasedFrom })
+  }
+
+  async function handlePriceBlur() {
+    await updateItem(item.id, { price: price ? Number(price) : undefined })
   }
 
   async function handleDelete() {
@@ -80,6 +85,14 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
               value={purchasedFrom}
               onChange={(e) => setPurchasedFrom(e.target.value)}
               onBlur={handlePurchasedFromBlur}
+            />
+            <input
+              className="text-input"
+              placeholder="Price paid (optional)"
+              inputMode="decimal"
+              value={price}
+              onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ''))}
+              onBlur={handlePriceBlur}
             />
             <button className="btn danger" onClick={handleDelete}>
               Delete

@@ -1,10 +1,10 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { Item, Outfit, PackingList } from './types'
+import type { Item, Outfit, Wardrobe } from './types'
 
 export const db = new Dexie('closet') as Dexie & {
   items: EntityTable<Item, 'id'>
   outfits: EntityTable<Outfit, 'id'>
-  packingLists: EntityTable<PackingList, 'id'>
+  wardrobes: EntityTable<Wardrobe, 'id'>
 }
 
 db.version(1).stores({
@@ -39,6 +39,26 @@ db.version(2)
           delete outfit.skirtId
         }
       })
+  })
+
+db.version(3)
+  .stores({
+    items: 'id, category, createdAt',
+    outfits: 'id, createdAt',
+    packingLists: null,
+    wardrobes: 'id, createdAt',
+  })
+  .upgrade(async (tx) => {
+    const oldLists = await tx.table('packingLists').toArray()
+    await tx.table('wardrobes').bulkAdd(
+      oldLists.map((list) => ({
+        id: list.id,
+        name: list.name,
+        entries: list.entries,
+        packingMode: true,
+        createdAt: list.createdAt,
+      })),
+    )
   })
 
 if (navigator.storage?.persist) {

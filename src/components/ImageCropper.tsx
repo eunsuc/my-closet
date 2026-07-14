@@ -23,12 +23,16 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
   { image },
   ref,
 ) {
-  const url = useBlobUrl(image)
+  const [baseImage, setBaseImage] = useState(image)
+  const url = useBlobUrl(baseImage)
   const containerRef = useRef<HTMLDivElement>(null)
   const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null)
   const [containerSize, setContainerSize] = useState<{ w: number; h: number } | null>(null)
   const [insets, setInsets] = useState<Insets>(ZERO_INSETS)
-  const dragEdge = useRef<keyof Insets | null>(null)
+  const [rotating, setRotating] = useState(false)
+  const dragState = useRef<{ edge: keyof Insets; startPos: number; startInset: number } | null>(
+    null,
+  )
 
   function measure() {
     const rect = containerRef.current?.getBoundingClientRect()
@@ -52,15 +56,15 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
     ref,
     () => ({
       async getCroppedBlob() {
-        if (!naturalSize) return image
+        if (!naturalSize) return baseImage
         const { w, h } = naturalSize
         const sx = Math.round(insets.left * w)
         const sy = Math.round(insets.top * h)
         const sw = Math.round(w - (insets.left + insets.right) * w)
         const sh = Math.round(h - (insets.top + insets.bottom) * h)
-        if (sx === 0 && sy === 0 && sw === w && sh === h) return image
+        if (sx === 0 && sy === 0 && sw === w && sh === h) return baseImage
 
-        const bitmap = await createImageBitmap(image)
+        const bitmap = await createImageBitmap(baseImage)
         const canvas = document.createElement('canvas')
         canvas.width = sw
         canvas.height = sh
@@ -77,7 +81,7 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
         })
       },
     }),
-    [image, insets, naturalSize],
+    [baseImage, insets, naturalSize],
   )
 
   function handleImgLoad(e: React.SyntheticEvent<HTMLImageElement>) {
@@ -86,50 +90,74 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
     measure()
   }
 
+  async function handleRotate() {
+    if (rotating) return
+    setRotating(true)
+    try {
+      const bitmap = await createImageBitmap(baseImage)
+      const canvas = document.createElement('canvas')
+      canvas.width = bitmap.height
+      canvas.height = bitmap.width
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      ctx.translate(canvas.width / 2, canvas.height / 2)
+      ctx.rotate(Math.PI / 2)
+      ctx.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2)
+      bitmap.close()
+      const rotated = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error('Rotate failed'))),
+          'image/png',
+        )
+      })
+      setBaseImage(rotated)
+      setInsets(ZERO_INSETS)
+    } finally {
+      setRotating(false)
+    }
+  }
+
   function startDrag(edge: keyof Insets) {
     return (e: React.PointerEvent) => {
       e.stopPropagation()
       e.preventDefault()
-      dragEdge.current = edge
+      const pos = edge === 'left' || edge === 'right' ? e.clientX : e.clientY
+      dragState.current = { edge, startPos: pos, startInset: insets[edge] }
       ;(e.target as Element).setPointerCapture(e.pointerId)
     }
   }
 
   function handlePointerMove(e: React.PointerEvent) {
-    const edge = dragEdge.current
-    if (!edge || !renderedRect) return
-    const rect = containerRef.current?.getBoundingClientRect()
-    if (!rect) return
+    const drag = dragState.current
+    if (!drag || !renderedRect) return
+    const { edge, startPos, startInset } = drag
 
     if (edge === 'left' || edge === 'right') {
-      const xInImage = e.clientX - rect.left - renderedRect.offsetX
-      const fraction = clamp(xInImage / renderedRect.renderedW, 0, 1)
+      const deltaFraction = (e.clientX - startPos) / renderedRect.renderedW
       setInsets((prev) =>
         edge === 'left'
-          ? { ...prev, left: clamp(fraction, 0, MAX_INSET - prev.right) }
-          : { ...prev, right: clamp(1 - fraction, 0, MAX_INSET - prev.left) },
+          ? { ...prev, left: clamp(startInset + deltaFraction, 0, MAX_INSET - prev.right) }
+          : { ...prev, right: clamp(startInset - deltaFraction, 0, MAX_INSET - prev.left) },
       )
     } else {
-      const yInImage = e.clientY - rect.top - renderedRect.offsetY
-      const fraction = clamp(yInImage / renderedRect.renderedH, 0, 1)
+      const deltaFraction = (e.clientY - startPos) / renderedRect.renderedH
       setInsets((prev) =>
         edge === 'top'
-          ? { ...prev, top: clamp(fraction, 0, MAX_INSET - prev.bottom) }
-          : { ...prev, bottom: clamp(1 - fraction, 0, MAX_INSET - prev.top) },
+          ? { ...prev, top: clamp(startInset + deltaFraction, 0, MAX_INSET - prev.bottom) }
+          : { ...prev, bottom: clamp(startInset - deltaFraction, 0, MAX_INSET - prev.top) },
       )
     }
   }
 
   function handlePointerUp() {
-    dragEdge.current = null
+    dragState.current = null
   }
 
   function resetCrop() {
     setInsets(ZERO_INSETS)
   }
 
-  const hasCrop =
-    insets.top > 0 || insets.right > 0 || insets.bottom > 0 || insets.left > 0
+  const hasCrop = insets.top > 0 || insets.right > 0 || insets.bottom > 0 || insets.left > 0
 
   return (
     <div className="cropper">
@@ -167,11 +195,16 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
           </>
         )}
       </div>
-      {hasCrop && (
-        <button type="button" className="cropper-reset" onClick={resetCrop}>
-          Reset crop
+      <div className="cropper-toolbar">
+        <button type="button" className="cropper-tool-btn" disabled={rotating} onClick={handleRotate}>
+          ⟳ Rotate
         </button>
-      )}
+        {hasCrop && (
+          <button type="button" className="cropper-tool-btn" onClick={resetCrop}>
+            Reset crop
+          </button>
+        )}
+      </div>
     </div>
   )
 })

@@ -3,7 +3,6 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { useBlobUrl } from '../hooks/useBlobUrl'
 import { ImportSheet } from '../components/ImportSheet'
-import { ImportChooserSheet } from '../components/ImportChooserSheet'
 import { ItemDetailSheet } from '../components/ItemDetailSheet'
 import { HangerIcon } from '../components/icons'
 import type { Category, Item } from '../types'
@@ -29,7 +28,6 @@ function ItemThumb({ item, onClick }: { item: Item; onClick: () => void }) {
 
 export default function Closet() {
   const [filter, setFilter] = useState<Category | 'all'>('all')
-  const [showChooser, setShowChooser] = useState(false)
   const [pendingImage, setPendingImage] = useState<Blob | null>(null)
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -82,23 +80,10 @@ export default function Closet() {
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
-      <button className="fab" onClick={() => setShowChooser(true)}>
+      <button className="fab" onClick={() => fileInputRef.current?.click()}>
         +
       </button>
 
-      {showChooser && (
-        <ImportChooserSheet
-          onChooseFile={() => {
-            setShowChooser(false)
-            fileInputRef.current?.click()
-          }}
-          onPasted={(blob) => {
-            setShowChooser(false)
-            setPendingImage(blob)
-          }}
-          onClose={() => setShowChooser(false)}
-        />
-      )}
       {pendingImage && (
         <ImportSheet image={pendingImage} onClose={() => setPendingImage(null)} />
       )}

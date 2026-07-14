@@ -101,7 +101,6 @@ export default function Build() {
       <div className="build-stage">
         <Band
           items={hatsWithNone}
-          index={hatIndex}
           onIndexChange={setHatIndex}
           emptyLabel="No hats yet"
           noneLabel="No hat"
@@ -112,13 +111,11 @@ export default function Build() {
           <>
             <Band
               items={tops}
-              index={topIndex}
               onIndexChange={setTopIndex}
               emptyLabel="No tops yet — add some in Closet"
             />
             <Band
               items={bottoms}
-              index={bottomIndex}
               onIndexChange={setBottomIndex}
               emptyLabel="No bottoms yet — add some in Closet"
             />
@@ -126,7 +123,6 @@ export default function Build() {
         ) : (
           <Band
             items={dresses}
-            index={dressIndex}
             onIndexChange={setDressIndex}
             emptyLabel="No dresses yet — add some in Closet"
           />
@@ -134,7 +130,6 @@ export default function Build() {
 
         <Band
           items={shoesWithNone}
-          index={shoesIndex}
           onIndexChange={setShoesIndex}
           emptyLabel="No shoes yet"
           noneLabel="No shoes"
@@ -143,7 +138,6 @@ export default function Build() {
 
         <Band
           items={bagsWithNone}
-          index={bagIndex}
           onIndexChange={setBagIndex}
           emptyLabel="No bags yet"
           noneLabel="No bag"

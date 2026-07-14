@@ -5,13 +5,15 @@
   --text: #f4f1ea;
   --text-dim: #96908a;
   --border: #2c2a2e;
-  --accent: #d4af37;
-  --accent-dim: #8a7326;
-  --accent-text: #14120a;
+  --accent: #a78bfa;
+  --accent-2: #60a5fa;
+  --accent-text: #ffffff;
   --danger: #a8434a;
   --chip-bg: #201f24;
   --sans: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
   --serif: ui-serif, Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+  --app-height: 100dvh;
+  --tab-bar-height: 60px;
   color-scheme: dark;
 }
 
@@ -36,6 +38,7 @@ body {
   height: 100vh;
   height: 100svh;
   height: 100dvh;
+  height: var(--app-height);
 }
 
 button {
@@ -56,6 +59,9 @@ img {
   margin: 0 auto;
   background: var(--bg);
   position: relative;
+  /* Establishes a containing block so position:fixed children (fab, save-fab)
+     anchor to the app's own bounds instead of the true viewport. */
+  transform: translateZ(0);
 }
 
 .app-content {
@@ -237,17 +243,17 @@ img {
 
 /* Fab */
 .fab {
-  position: absolute;
-  bottom: 16px;
+  position: fixed;
+  bottom: calc(var(--tab-bar-height) + 16px);
   right: 16px;
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: var(--accent-text);
   border: none;
   font-size: 28px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 175, 55, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(167, 139, 250, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -396,9 +402,14 @@ img {
   height: 36px;
 }
 
-.cropper-reset {
-  display: block;
-  margin: 8px auto 0;
+.cropper-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cropper-tool-btn {
   padding: 6px 14px;
   border-radius: 999px;
   border: none;
@@ -406,6 +417,10 @@ img {
   color: var(--text);
   font-size: 13px;
   font-weight: 600;
+}
+
+.cropper-tool-btn:disabled {
+  opacity: 0.5;
 }
 
 .category-row {
@@ -448,7 +463,7 @@ img {
   padding: 13px 0;
   border-radius: 12px;
   border: none;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: var(--accent-text);
   font-size: 15px;
   font-weight: 600;
@@ -536,6 +551,26 @@ img {
   flex: 0.8;
 }
 
+.band-viewport {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.band-track {
+  display: flex;
+  height: 100%;
+}
+
+.band-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .band-none {
   color: var(--text-dim);
   font-size: 13px;
@@ -552,8 +587,9 @@ img {
 }
 
 .band img {
-  max-width: 85%;
-  max-height: 85%;
+  width: 85%;
+  height: auto;
+  max-height: 100%;
   object-fit: contain;
   pointer-events: none;
 }
@@ -577,19 +613,19 @@ img {
 }
 
 .save-fab {
-  position: absolute;
-  bottom: 16px;
+  position: fixed;
+  bottom: calc(var(--tab-bar-height) + 16px);
   right: 16px;
   z-index: 10;
   padding: 14px 22px;
   border-radius: 999px;
   border: none;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: var(--accent-text);
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.4px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 175, 55, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(167, 139, 250, 0.35);
 }
 
 .save-fab:disabled {

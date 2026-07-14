@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { useBlobUrl } from '../hooks/useBlobUrl'
 import { OutfitPreview } from './OutfitPreview'
-import { addPackingEntry } from '../lib/repo'
+import { addWardrobeEntry } from '../lib/repo'
 import type { Item, Outfit } from '../types'
 
 function OutfitPickRow({
@@ -42,14 +42,14 @@ function ItemPickRow({ item, onAdd }: { item: Item; onAdd: () => void }) {
   )
 }
 
-export function AddToPackingListSheet({
-  listId,
+export function AddToWardrobeSheet({
+  wardrobeId,
   onClose,
 }: {
-  listId: string
+  wardrobeId: string
   onClose: () => void
 }) {
-  const [tab, setTab] = useState<'outfits' | 'items'>('outfits')
+  const [tab, setTab] = useState<'items' | 'outfits'>('items')
 
   const outfits = useLiveQuery(() => db.outfits.orderBy('createdAt').reverse().toArray()) ?? []
   const items = useLiveQuery(() => db.items.orderBy('createdAt').reverse().toArray()) ?? []
@@ -59,33 +59,44 @@ export function AddToPackingListSheet({
   })
 
   async function handleAddOutfit(id: string) {
-    await addPackingEntry(listId, 'outfit', id)
+    await addWardrobeEntry(wardrobeId, 'outfit', id)
   }
 
   async function handleAddItem(id: string) {
-    await addPackingEntry(listId, 'item', id)
+    await addWardrobeEntry(wardrobeId, 'item', id)
   }
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="sheet-title">Add to list</div>
+        <div className="sheet-title">Add to wardrobe</div>
         <div className="mode-toggle" style={{ marginBottom: 16 }}>
-          <button
-            className={'mode-toggle-btn' + (tab === 'outfits' ? ' active' : '')}
-            onClick={() => setTab('outfits')}
-          >
-            Outfits
-          </button>
           <button
             className={'mode-toggle-btn' + (tab === 'items' ? ' active' : '')}
             onClick={() => setTab('items')}
           >
             Items
           </button>
+          <button
+            className={'mode-toggle-btn' + (tab === 'outfits' ? ' active' : '')}
+            onClick={() => setTab('outfits')}
+          >
+            Outfits
+          </button>
         </div>
 
         <div className="pick-grid">
+          {tab === 'items' &&
+            (items.length === 0 ? (
+              <div className="empty-state" style={{ padding: 16 }}>
+                No items yet.
+              </div>
+            ) : (
+              items.map((item) => (
+                <ItemPickRow key={item.id} item={item} onAdd={() => handleAddItem(item.id)} />
+              ))
+            ))}
+
           {tab === 'outfits' &&
             itemsMap &&
             (outfits.length === 0 ? (
@@ -100,17 +111,6 @@ export function AddToPackingListSheet({
                   items={itemsMap}
                   onAdd={() => handleAddOutfit(outfit.id)}
                 />
-              ))
-            ))}
-
-          {tab === 'items' &&
-            (items.length === 0 ? (
-              <div className="empty-state" style={{ padding: 16 }}>
-                No items yet.
-              </div>
-            ) : (
-              items.map((item) => (
-                <ItemPickRow key={item.id} item={item} onAdd={() => handleAddItem(item.id)} />
               ))
             ))}
         </div>

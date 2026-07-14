@@ -1,13 +1,14 @@
 import { v4 as uuid } from 'uuid'
 import { db } from '../db'
 import { makeThumbnail } from './thumbnail'
-import type { Category, Item, Outfit, PackingEntryKind, PackingList } from '../types'
+import type { Category, Item, Outfit, Wardrobe, WardrobeEntryKind } from '../types'
 
 export async function addItem(
   image: Blob,
   category: Category,
   name?: string,
   purchasedFrom?: string,
+  price?: number,
 ): Promise<Item> {
   const thumbnail = await makeThumbnail(image)
   const item: Item = {
@@ -17,6 +18,7 @@ export async function addItem(
     thumbnail,
     name: name?.trim() || undefined,
     purchasedFrom: purchasedFrom?.trim() || undefined,
+    price: price !== undefined && !Number.isNaN(price) ? price : undefined,
     createdAt: Date.now(),
   }
   await db.items.add(item)
@@ -25,7 +27,7 @@ export async function addItem(
 
 export async function updateItem(
   id: string,
-  updates: Partial<Pick<Item, 'category' | 'name' | 'purchasedFrom'>>,
+  updates: Partial<Pick<Item, 'category' | 'name' | 'purchasedFrom' | 'price'>>,
 ) {
   await db.items.update(id, updates)
 }
@@ -46,19 +48,19 @@ function referencesItem(outfit: Outfit, itemId: string) {
   )
 }
 
-async function pruneEntriesReferencing(kind: PackingEntryKind, refIds: Set<string>) {
+async function pruneEntriesReferencing(kind: WardrobeEntryKind, refIds: Set<string>) {
   if (refIds.size === 0) return
-  const lists = await db.packingLists.toArray()
-  for (const list of lists) {
-    const filtered = list.entries.filter((e) => !(e.kind === kind && refIds.has(e.refId)))
-    if (filtered.length !== list.entries.length) {
-      await db.packingLists.update(list.id, { entries: filtered })
+  const wardrobes = await db.wardrobes.toArray()
+  for (const wardrobe of wardrobes) {
+    const filtered = wardrobe.entries.filter((e) => !(e.kind === kind && refIds.has(e.refId)))
+    if (filtered.length !== wardrobe.entries.length) {
+      await db.wardrobes.update(wardrobe.id, { entries: filtered })
     }
   }
 }
 
 export async function deleteItem(id: string) {
-  await db.transaction('rw', db.items, db.outfits, db.packingLists, async () => {
+  await db.transaction('rw', db.items, db.outfits, db.wardrobes, async () => {
     const affectedOutfits = await db.outfits.filter((o) => referencesItem(o, id)).toArray()
     const affectedOutfitIds = new Set(affectedOutfits.map((o) => o.id))
     await db.outfits.bulkDelete([...affectedOutfitIds])
@@ -103,51 +105,56 @@ export async function saveOutfit(candidate: OutfitSlots, name?: string): Promise
 }
 
 export async function deleteOutfit(id: string) {
-  await db.transaction('rw', db.outfits, db.packingLists, async () => {
+  await db.transaction('rw', db.outfits, db.wardrobes, async () => {
     await pruneEntriesReferencing('outfit', new Set([id]))
     await db.outfits.delete(id)
   })
 }
 
-export async function createPackingList(name: string): Promise<PackingList> {
-  const list: PackingList = {
+export async function createWardrobe(name: string): Promise<Wardrobe> {
+  const wardrobe: Wardrobe = {
     id: uuid(),
-    name: name.trim() || 'Untitled trip',
+    name: name.trim() || 'Untitled wardrobe',
     entries: [],
+    packingMode: false,
     createdAt: Date.now(),
   }
-  await db.packingLists.add(list)
-  return list
+  await db.wardrobes.add(wardrobe)
+  return wardrobe
 }
 
-export async function renamePackingList(id: string, name: string) {
-  await db.packingLists.update(id, { name: name.trim() || 'Untitled trip' })
+export async function renameWardrobe(id: string, name: string) {
+  await db.wardrobes.update(id, { name: name.trim() || 'Untitled wardrobe' })
 }
 
-export async function deletePackingList(id: string) {
-  await db.packingLists.delete(id)
+export async function deleteWardrobe(id: string) {
+  await db.wardrobes.delete(id)
 }
 
-export async function addPackingEntry(listId: string, kind: PackingEntryKind, refId: string) {
-  const list = await db.packingLists.get(listId)
-  if (!list) return
-  if (list.entries.some((e) => e.kind === kind && e.refId === refId)) return
+export async function setWardrobePackingMode(id: string, packingMode: boolean) {
+  await db.wardrobes.update(id, { packingMode })
+}
+
+export async function addWardrobeEntry(wardrobeId: string, kind: WardrobeEntryKind, refId: string) {
+  const wardrobe = await db.wardrobes.get(wardrobeId)
+  if (!wardrobe) return
+  if (wardrobe.entries.some((e) => e.kind === kind && e.refId === refId)) return
   const entry = { id: uuid(), kind, refId, packed: false }
-  await db.packingLists.update(listId, { entries: [...list.entries, entry] })
+  await db.wardrobes.update(wardrobeId, { entries: [...wardrobe.entries, entry] })
 }
 
-export async function removePackingEntry(listId: string, entryId: string) {
-  const list = await db.packingLists.get(listId)
-  if (!list) return
-  await db.packingLists.update(listId, {
-    entries: list.entries.filter((e) => e.id !== entryId),
+export async function removeWardrobeEntry(wardrobeId: string, entryId: string) {
+  const wardrobe = await db.wardrobes.get(wardrobeId)
+  if (!wardrobe) return
+  await db.wardrobes.update(wardrobeId, {
+    entries: wardrobe.entries.filter((e) => e.id !== entryId),
   })
 }
 
-export async function togglePackingEntry(listId: string, entryId: string) {
-  const list = await db.packingLists.get(listId)
-  if (!list) return
-  await db.packingLists.update(listId, {
-    entries: list.entries.map((e) => (e.id === entryId ? { ...e, packed: !e.packed } : e)),
+export async function toggleWardrobeEntry(wardrobeId: string, entryId: string) {
+  const wardrobe = await db.wardrobes.get(wardrobeId)
+  if (!wardrobe) return
+  await db.wardrobes.update(wardrobeId, {
+    entries: wardrobe.entries.map((e) => (e.id === entryId ? { ...e, packed: !e.packed } : e)),
   })
 }

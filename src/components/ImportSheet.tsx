@@ -8,6 +8,7 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
   const [category, setCategory] = useState<Category | null>(null)
   const [name, setName] = useState('')
   const [purchasedFrom, setPurchasedFrom] = useState('')
+  const [price, setPrice] = useState('')
   const [saving, setSaving] = useState(false)
   const cropperRef = useRef<ImageCropperHandle>(null)
 
@@ -15,7 +16,7 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
     if (!category || saving) return
     setSaving(true)
     const croppedImage = (await cropperRef.current?.getCroppedBlob()) ?? image
-    await addItem(croppedImage, category, name, purchasedFrom)
+    await addItem(croppedImage, category, name, purchasedFrom, price ? Number(price) : undefined)
     setSaving(false)
     onClose()
   }
@@ -37,6 +38,13 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
           placeholder="Bought at (optional)"
           value={purchasedFrom}
           onChange={(e) => setPurchasedFrom(e.target.value)}
+        />
+        <input
+          className="text-input"
+          placeholder="Price paid (optional)"
+          inputMode="decimal"
+          value={price}
+          onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ''))}
         />
         <button className="btn" disabled={!category || saving} onClick={handleSave}>
           {saving ? 'Saving…' : 'Save'}

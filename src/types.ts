@@ -7,6 +7,7 @@ export interface Item {
   thumbnail: Blob
   name?: string
   purchasedFrom?: string
+  price?: number
   createdAt: number
 }
 
@@ -22,18 +23,19 @@ export interface Outfit {
   createdAt: number
 }
 
-export type PackingEntryKind = 'outfit' | 'item'
+export type WardrobeEntryKind = 'outfit' | 'item'
 
-export interface PackingEntry {
+export interface WardrobeEntry {
   id: string
-  kind: PackingEntryKind
+  kind: WardrobeEntryKind
   refId: string
   packed: boolean
 }
 
-export interface PackingList {
+export interface Wardrobe {
   id: string
   name: string
-  entries: PackingEntry[]
+  entries: WardrobeEntry[]
+  packingMode: boolean
   createdAt: number
 }
