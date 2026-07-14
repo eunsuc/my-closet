@@ -73,7 +73,7 @@ export default function Build() {
   }
 
   return (
-    <div className="screen">
+    <div className="screen build-screen">
       <div className="screen-header">
         <div className="screen-title">Build</div>
         <div className="mode-toggle">
