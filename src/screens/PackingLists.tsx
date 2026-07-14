@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { NewPackingListSheet } from '../components/NewPackingListSheet'
+import { SuitcaseIcon } from '../components/icons'
 
 export default function PackingLists() {
   const [showNew, setShowNew] = useState(false)
@@ -17,7 +18,7 @@ export default function PackingLists() {
 
       {lists && lists.length === 0 && (
         <div className="empty-state">
-          <div style={{ fontSize: 40 }}>🧳</div>
+          <SuitcaseIcon size={40} />
           <div>No packing lists yet. Tap + to start one for a trip.</div>
         </div>
       )}

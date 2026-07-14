@@ -30,6 +30,11 @@ export async function updateItem(
   await db.items.update(id, updates)
 }
 
+export async function recropItem(id: string, image: Blob) {
+  const thumbnail = await makeThumbnail(image)
+  await db.items.update(id, { image, thumbnail })
+}
+
 function referencesItem(outfit: Outfit, itemId: string) {
   return (
     outfit.hatId === itemId ||

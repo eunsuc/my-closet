@@ -4,12 +4,13 @@ import Build from './screens/Build'
 import Outfits from './screens/Outfits'
 import PackingLists from './screens/PackingLists'
 import PackingListDetail from './screens/PackingListDetail'
+import { HangerIcon, MirrorIcon, FrameIcon, SuitcaseIcon } from './components/icons'
 
 const TABS = [
-  { to: '/', label: 'Closet', icon: '👕' },
-  { to: '/build', label: 'Build', icon: '🪞' },
-  { to: '/outfits', label: 'Outfits', icon: '📸' },
-  { to: '/packing', label: 'Packing', icon: '🧳' },
+  { to: '/', label: 'Closet', Icon: HangerIcon },
+  { to: '/build', label: 'Build', Icon: MirrorIcon },
+  { to: '/outfits', label: 'Outfits', Icon: FrameIcon },
+  { to: '/packing', label: 'Packing', Icon: SuitcaseIcon },
 ]
 
 export default function App() {
@@ -32,7 +33,9 @@ export default function App() {
             end={tab.to === '/'}
             className={({ isActive }) => 'tab-bar-item' + (isActive ? ' active' : '')}
           >
-            <span className="tab-bar-icon">{tab.icon}</span>
+            <span className="tab-bar-icon">
+              <tab.Icon />
+            </span>
             <span className="tab-bar-label">{tab.label}</span>
           </NavLink>
         ))}

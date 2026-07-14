@@ -5,6 +5,7 @@ import { useBlobUrl } from '../hooks/useBlobUrl'
 import { ImportSheet } from '../components/ImportSheet'
 import { ImportChooserSheet } from '../components/ImportChooserSheet'
 import { ItemDetailSheet } from '../components/ItemDetailSheet'
+import { HangerIcon } from '../components/icons'
 import type { Category, Item } from '../types'
 
 const FILTERS: { value: Category | 'all'; label: string }[] = [
@@ -63,7 +64,7 @@ export default function Closet() {
 
       {items && items.length === 0 && (
         <div className="empty-state">
-          <div style={{ fontSize: 40 }}>👕</div>
+          <HangerIcon size={40} />
           <div>No items yet. Tap + to import a photo.</div>
         </div>
       )}

@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { OutfitPreview } from '../components/OutfitPreview'
 import { OutfitDetailSheet } from '../components/OutfitDetailSheet'
+import { FrameIcon } from '../components/icons'
 import type { Outfit } from '../types'
 
 export default function Outfits() {
@@ -22,7 +23,7 @@ export default function Outfits() {
 
       {outfits && outfits.length === 0 && (
         <div className="empty-state">
-          <div style={{ fontSize: 40 }}>📸</div>
+          <FrameIcon size={40} />
           <div>No saved outfits yet. Build one in the Build tab.</div>
         </div>
       )}

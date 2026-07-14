@@ -1,29 +1,18 @@
 :root {
-  --bg: #fafafa;
-  --surface: #ffffff;
-  --text: #1c1c1e;
-  --text-dim: #8a8a8e;
-  --border: #e2e2e5;
-  --accent: #aa3bff;
-  --accent-text: #ffffff;
-  --danger: #ff3b30;
-  --chip-bg: #f0f0f2;
+  --bg: #0a0a0c;
+  --surface: #17161a;
+  --surface-2: #201f24;
+  --text: #f4f1ea;
+  --text-dim: #96908a;
+  --border: #2c2a2e;
+  --accent: #d4af37;
+  --accent-dim: #8a7326;
+  --accent-text: #14120a;
+  --danger: #a8434a;
+  --chip-bg: #201f24;
   --sans: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #000000;
-    --surface: #1c1c1e;
-    --text: #f2f2f2;
-    --text-dim: #8a8a8e;
-    --border: #2e2e30;
-    --accent: #c084fc;
-    --accent-text: #14031f;
-    --danger: #ff453a;
-    --chip-bg: #2c2c2e;
-  }
+  --serif: ui-serif, Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+  color-scheme: dark;
 }
 
 * {
@@ -35,16 +24,18 @@ body {
   margin: 0;
   height: 100%;
   overscroll-behavior-y: none;
+  background: var(--bg);
 }
 
 body {
   font: 16px/1.4 var(--sans);
   color: var(--text);
-  background: var(--bg);
 }
 
 #root {
+  height: 100vh;
   height: 100svh;
+  height: 100dvh;
 }
 
 button {
@@ -69,6 +60,7 @@ img {
 
 .app-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -98,9 +90,11 @@ img {
 }
 
 .screen-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 10px;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  margin: 0 0 12px;
 }
 
 .tab-bar {
@@ -129,8 +123,14 @@ img {
 }
 
 .tab-bar-icon {
-  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+}
+
+.tab-bar-item.active .tab-bar-label {
+  font-weight: 600;
 }
 
 /* Filter chips */
@@ -166,7 +166,7 @@ img {
 .item-grid {
   column-count: 3;
   column-gap: 6px;
-  padding: 6px;
+  padding: 6px 6px 90px;
 }
 
 .item-grid-cell {
@@ -191,7 +191,7 @@ img {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  padding: 10px 16px;
+  padding: 10px 16px 24px;
 }
 
 .outfit-card {
@@ -247,7 +247,7 @@ img {
   color: var(--accent-text);
   border: none;
   font-size: 28px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 175, 55, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,8 +276,9 @@ img {
 }
 
 .sheet-title {
-  font-size: 17px;
-  font-weight: 700;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
   margin: 0 0 16px;
   text-align: center;
 }
@@ -449,8 +450,9 @@ img {
   border: none;
   background: var(--accent);
   color: var(--accent-text);
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
   margin-bottom: 8px;
 }
 
@@ -495,14 +497,16 @@ img {
   border: none;
   background: transparent;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
   color: var(--text-dim);
 }
 
 .mode-toggle-btn.active {
   background: var(--surface);
-  color: var(--text);
+  color: var(--accent);
 }
 
 .build-stage {
@@ -583,8 +587,9 @@ img {
   background: var(--accent);
   color: var(--accent-text);
   font-size: 15px;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 175, 55, 0.35);
 }
 
 .save-fab:disabled {
@@ -610,7 +615,7 @@ img {
 .packing-list-overview {
   display: flex;
   flex-direction: column;
-  padding: 10px 16px;
+  padding: 10px 16px 90px;
   gap: 8px;
 }
 
@@ -648,8 +653,9 @@ img {
 .screen-title-input {
   display: block;
   width: 100%;
-  font-size: 22px;
-  font-weight: 700;
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 500;
   border: none;
   background: none;
   color: var(--text);

@@ -5,6 +5,7 @@ import { db } from '../db'
 import { useBlobUrl } from '../hooks/useBlobUrl'
 import { OutfitPreview } from '../components/OutfitPreview'
 import { AddToPackingListSheet } from '../components/AddToPackingListSheet'
+import { SuitcaseIcon } from '../components/icons'
 import {
   deletePackingList,
   removePackingEntry,
@@ -126,7 +127,7 @@ export default function PackingListDetail() {
 
       {list.entries.length === 0 && (
         <div className="empty-state">
-          <div style={{ fontSize: 40 }}>🧳</div>
+          <SuitcaseIcon size={40} />
           <div>Tap + to add outfits or items to pack.</div>
         </div>
       )}
