@@ -1,4 +1,4 @@
-export type Category = 'hat' | 'top' | 'bottom' | 'dress' | 'shoes'
+export type Category = 'hat' | 'top' | 'bottom' | 'dress' | 'shoes' | 'bag'
 
 export interface Item {
   id: string
@@ -17,6 +17,7 @@ export interface Outfit {
   bottomId?: string
   dressId?: string
   shoesId?: string
+  bagId?: string
   name?: string
   createdAt: number
 }

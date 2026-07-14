@@ -17,12 +17,14 @@ export function OutfitPreview({
   top,
   bottom,
   shoes,
+  bag,
 }: {
   hat?: Item
   dress?: Item
   top?: Item
   bottom?: Item
   shoes?: Item
+  bag?: Item
 }) {
   return (
     <div className="outfit-card-preview">
@@ -30,6 +32,7 @@ export function OutfitPreview({
       {dress ? <Band item={dress} /> : <Band item={top} />}
       {!dress && <Band item={bottom} />}
       <Band item={shoes} accessory />
+      <Band item={bag} accessory />
     </div>
   )
 }

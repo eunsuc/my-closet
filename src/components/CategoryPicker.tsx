@@ -6,6 +6,7 @@ const OPTIONS: { value: Category; label: string }[] = [
   { value: 'bottom', label: 'Bottom' },
   { value: 'dress', label: 'Dress' },
   { value: 'shoes', label: 'Shoes' },
+  { value: 'bag', label: 'Bag' },
 ]
 
 export function CategoryPicker({

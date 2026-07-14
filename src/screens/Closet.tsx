@@ -14,6 +14,7 @@ const FILTERS: { value: Category | 'all'; label: string }[] = [
   { value: 'bottom', label: 'Bottoms' },
   { value: 'dress', label: 'Dresses' },
   { value: 'shoes', label: 'Shoes' },
+  { value: 'bag', label: 'Bags' },
 ]
 
 function ItemThumb({ item, onClick }: { item: Item; onClick: () => void }) {

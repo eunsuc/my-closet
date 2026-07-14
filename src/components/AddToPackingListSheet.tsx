@@ -24,6 +24,7 @@ function OutfitPickRow({
           top={outfit.topId ? items.get(outfit.topId) : undefined}
           bottom={outfit.bottomId ? items.get(outfit.bottomId) : undefined}
           shoes={outfit.shoesId ? items.get(outfit.shoesId) : undefined}
+          bag={outfit.bagId ? items.get(outfit.bagId) : undefined}
         />
       </div>
       <div className="pick-row-name">{outfit.name || 'Outfit'}</div>

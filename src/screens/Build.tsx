@@ -18,6 +18,7 @@ export default function Build() {
   const [bottomIndex, setBottomIndex] = useState(0)
   const [dressIndex, setDressIndex] = useState(0)
   const [shoesIndex, setShoesIndex] = useState(0)
+  const [bagIndex, setBagIndex] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
 
   const hats = useLiveQuery(() => db.items.where('category').equals('hat').toArray()) ?? []
@@ -25,6 +26,7 @@ export default function Build() {
   const bottoms = useLiveQuery(() => db.items.where('category').equals('bottom').toArray()) ?? []
   const dresses = useLiveQuery(() => db.items.where('category').equals('dress').toArray()) ?? []
   const shoes = useLiveQuery(() => db.items.where('category').equals('shoes').toArray()) ?? []
+  const bags = useLiveQuery(() => db.items.where('category').equals('bag').toArray()) ?? []
   const outfits = useLiveQuery(() => db.outfits.toArray()) ?? []
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export default function Build() {
 
   const hatsWithNone = withNone(hats)
   const shoesWithNone = withNone(shoes)
+  const bagsWithNone = withNone(bags)
 
   const currentHat = hatsWithNone.length ? hatsWithNone[hatIndex % hatsWithNone.length] : undefined
   const currentTop = tops.length ? tops[topIndex % tops.length] : undefined
@@ -43,6 +46,7 @@ export default function Build() {
   const currentShoes = shoesWithNone.length
     ? shoesWithNone[shoesIndex % shoesWithNone.length]
     : undefined
+  const currentBag = bagsWithNone.length ? bagsWithNone[bagIndex % bagsWithNone.length] : undefined
 
   const candidate = {
     hatId: currentHat?.id,
@@ -50,6 +54,7 @@ export default function Build() {
     bottomId: mode === 'separates' ? currentBottom?.id : undefined,
     dressId: mode === 'dress' ? currentDress?.id : undefined,
     shoesId: currentShoes?.id,
+    bagId: currentBag?.id,
   }
 
   const isComplete =
@@ -63,7 +68,8 @@ export default function Build() {
         o.topId === candidate.topId &&
         o.bottomId === candidate.bottomId &&
         o.dressId === candidate.dressId &&
-        o.shoesId === candidate.shoesId,
+        o.shoesId === candidate.shoesId &&
+        o.bagId === candidate.bagId,
     )
 
   async function handleSave() {
@@ -132,6 +138,15 @@ export default function Build() {
           onIndexChange={setShoesIndex}
           emptyLabel="No shoes yet"
           noneLabel="No shoes"
+          accessory
+        />
+
+        <Band
+          items={bagsWithNone}
+          index={bagIndex}
+          onIndexChange={setBagIndex}
+          emptyLabel="No bags yet"
+          noneLabel="No bag"
           accessory
         />
       </div>

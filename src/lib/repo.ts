@@ -36,7 +36,8 @@ function referencesItem(outfit: Outfit, itemId: string) {
     outfit.topId === itemId ||
     outfit.bottomId === itemId ||
     outfit.dressId === itemId ||
-    outfit.shoesId === itemId
+    outfit.shoesId === itemId ||
+    outfit.bagId === itemId
   )
 }
 
@@ -62,7 +63,10 @@ export async function deleteItem(id: string) {
   })
 }
 
-type OutfitSlots = Pick<Outfit, 'hatId' | 'topId' | 'bottomId' | 'dressId' | 'shoesId'>
+type OutfitSlots = Pick<
+  Outfit,
+  'hatId' | 'topId' | 'bottomId' | 'dressId' | 'shoesId' | 'bagId'
+>
 
 function sameOutfit(a: OutfitSlots, b: Outfit) {
   return (
@@ -70,7 +74,8 @@ function sameOutfit(a: OutfitSlots, b: Outfit) {
     a.topId === b.topId &&
     a.bottomId === b.bottomId &&
     a.dressId === b.dressId &&
-    a.shoesId === b.shoesId
+    a.shoesId === b.shoesId &&
+    a.bagId === b.bagId
   )
 }
 
