@@ -1,0 +1,43 @@
+import { useRef, useState } from 'react'
+import { CategoryPicker } from './CategoryPicker'
+import { ImageCropper, type ImageCropperHandle } from './ImageCropper'
+import { addItem } from '../lib/repo'
+import type { Category } from '../types'
+
+export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => void }) {
+  const [category, setCategory] = useState<Category | null>(null)
+  const [name, setName] = useState('')
+  const [saving, setSaving] = useState(false)
+  const cropperRef = useRef<ImageCropperHandle>(null)
+
+  async function handleSave() {
+    if (!category || saving) return
+    setSaving(true)
+    const croppedImage = (await cropperRef.current?.getCroppedBlob()) ?? image
+    await addItem(croppedImage, category, name)
+    setSaving(false)
+    onClose()
+  }
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-title">New item</div>
+        <ImageCropper ref={cropperRef} image={image} />
+        <CategoryPicker value={category} onChange={setCategory} />
+        <input
+          className="text-input"
+          placeholder="Name (optional)"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button className="btn" disabled={!category || saving} onClick={handleSave}>
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+        <button className="btn secondary" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
