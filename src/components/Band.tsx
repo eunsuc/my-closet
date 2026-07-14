@@ -20,12 +20,14 @@ export function Band({
   emptyLabel,
   noneLabel,
   accessory,
+  matchWidth,
 }: {
   items: (Item | null)[]
   onIndexChange: (next: number) => void
   emptyLabel: string
   noneLabel?: string
   accessory?: boolean
+  matchWidth?: boolean
 }) {
   const [emblaRef, emblaApi] = useEmblaCarousel(EMBLA_OPTIONS)
 
@@ -47,16 +49,19 @@ export function Band({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emblaApi, items.length])
 
+  const className =
+    'band' + (accessory ? ' accessory' : '') + (matchWidth ? ' match-width' : '')
+
   if (items.length === 0) {
     return (
-      <div className={'band' + (accessory ? ' accessory' : '')}>
+      <div className={className}>
         <div className="band-empty">{emptyLabel}</div>
       </div>
     )
   }
 
   return (
-    <div className={'band' + (accessory ? ' accessory' : '')}>
+    <div className={className}>
       <div className="band-viewport" ref={emblaRef}>
         <div className="band-track">
           {items.map((item, i) => (

@@ -632,9 +632,22 @@ img {
 }
 
 .band img {
-  width: 85%;
-  height: auto;
+  max-width: 85%;
+  max-height: 85%;
+  object-fit: contain;
   pointer-events: none;
+}
+
+/* Top and Bottom bands stack as one visual outfit, so they share a fixed
+   width instead of each independently fitting its own box — otherwise a
+   narrow top and a wide skirt wouldn't line up. Other bands (dress, hat,
+   shoes, bag) are shown on their own with nothing to align to, so they
+   keep the safer contain-and-never-clip behavior above. */
+.band.match-width img {
+  width: 60%;
+  max-width: none;
+  height: auto;
+  max-height: none;
 }
 
 .band-indicator {

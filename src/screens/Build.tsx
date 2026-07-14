@@ -113,11 +113,13 @@ export default function Build() {
               items={tops}
               onIndexChange={setTopIndex}
               emptyLabel="No tops yet — add some in Closet"
+              matchWidth
             />
             <Band
               items={bottoms}
               onIndexChange={setBottomIndex}
               emptyLabel="No bottoms yet — add some in Closet"
+              matchWidth
             />
           </>
         ) : (
