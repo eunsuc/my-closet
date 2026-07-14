@@ -29,6 +29,7 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
   const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null)
   const [containerSize, setContainerSize] = useState<{ w: number; h: number } | null>(null)
   const [insets, setInsets] = useState<Insets>(ZERO_INSETS)
+  const [previewAngle, setPreviewAngle] = useState(0)
   const [rotating, setRotating] = useState(false)
   const dragState = useRef<{ edge: keyof Insets; startPos: number; startInset: number } | null>(
     null,
@@ -90,18 +91,23 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
     measure()
   }
 
-  async function handleRotate() {
-    if (rotating) return
+  async function commitRotation() {
+    if (previewAngle === 0 || rotating) return
     setRotating(true)
     try {
       const bitmap = await createImageBitmap(baseImage)
+      const rad = (previewAngle * Math.PI) / 180
+      const cos = Math.abs(Math.cos(rad))
+      const sin = Math.abs(Math.sin(rad))
+      const newW = Math.ceil(bitmap.width * cos + bitmap.height * sin)
+      const newH = Math.ceil(bitmap.width * sin + bitmap.height * cos)
       const canvas = document.createElement('canvas')
-      canvas.width = bitmap.height
-      canvas.height = bitmap.width
+      canvas.width = newW
+      canvas.height = newH
       const ctx = canvas.getContext('2d')
       if (!ctx) return
-      ctx.translate(canvas.width / 2, canvas.height / 2)
-      ctx.rotate(Math.PI / 2)
+      ctx.translate(newW / 2, newH / 2)
+      ctx.rotate(rad)
       ctx.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2)
       bitmap.close()
       const rotated = await new Promise<Blob>((resolve, reject) => {
@@ -112,6 +118,7 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
       })
       setBaseImage(rotated)
       setInsets(ZERO_INSETS)
+      setPreviewAngle(0)
     } finally {
       setRotating(false)
     }
@@ -158,6 +165,7 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
   }
 
   const hasCrop = insets.top > 0 || insets.right > 0 || insets.bottom > 0 || insets.left > 0
+  const showCropOverlay = renderedRect && previewAngle === 0
 
   return (
     <div className="cropper">
@@ -175,9 +183,10 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
             className="cropper-image"
             draggable={false}
             onLoad={handleImgLoad}
+            style={{ transform: `rotate(${previewAngle}deg)` }}
           />
         )}
-        {renderedRect && (
+        {showCropOverlay && (
           <>
             {(['top', 'bottom', 'left', 'right'] as const).map((edge) => (
               <div
@@ -195,16 +204,31 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
           </>
         )}
       </div>
-      <div className="cropper-toolbar">
-        <button type="button" className="cropper-tool-btn" disabled={rotating} onClick={handleRotate}>
-          ⟳ Rotate
-        </button>
-        {hasCrop && (
+
+      <div className="cropper-rotate-row">
+        <span className="cropper-rotate-label">{previewAngle}°</span>
+        <input
+          type="range"
+          className="cropper-rotate-slider"
+          min={-180}
+          max={180}
+          step={1}
+          value={previewAngle}
+          disabled={rotating}
+          onChange={(e) => setPreviewAngle(Number(e.target.value))}
+          onPointerUp={commitRotation}
+          onMouseUp={commitRotation}
+          onTouchEnd={commitRotation}
+        />
+      </div>
+
+      {hasCrop && (
+        <div className="cropper-toolbar">
           <button type="button" className="cropper-tool-btn" onClick={resetCrop}>
             Reset crop
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 })

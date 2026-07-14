@@ -12,7 +12,6 @@
   --chip-bg: #201f24;
   --sans: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
   --serif: ui-serif, Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
-  --app-height: 100dvh;
   --tab-bar-height: 60px;
   color-scheme: dark;
 }
@@ -25,6 +24,7 @@ html,
 body {
   margin: 0;
   height: 100%;
+  overflow: hidden;
   overscroll-behavior-y: none;
   background: var(--bg);
 }
@@ -34,11 +34,12 @@ body {
   color: var(--text);
 }
 
+/* position:fixed anchors directly to the real visual viewport, sidestepping
+   iOS's vh/svh/dvh inconsistencies in standalone (home-screen) display mode
+   that otherwise leave a gap at the bottom of the screen. */
 #root {
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
-  height: var(--app-height);
+  position: fixed;
+  inset: 0;
 }
 
 button {
@@ -402,6 +403,50 @@ img {
   height: 36px;
 }
 
+.cropper-rotate-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cropper-rotate-label {
+  flex-shrink: 0;
+  width: 40px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.cropper-rotate-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  outline: none;
+}
+
+.cropper-rotate-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+}
+
+.cropper-rotate-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+}
+
 .cropper-toolbar {
   display: flex;
   justify-content: center;
@@ -589,8 +634,6 @@ img {
 .band img {
   width: 85%;
   height: auto;
-  max-height: 100%;
-  object-fit: contain;
   pointer-events: none;
 }
 
