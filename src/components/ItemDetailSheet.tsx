@@ -7,6 +7,7 @@ import type { Item } from '../types'
 export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => void }) {
   const [category, setCategory] = useState(item.category)
   const [name, setName] = useState(item.name ?? '')
+  const [purchasedFrom, setPurchasedFrom] = useState(item.purchasedFrom ?? '')
   const imageUrl = useBlobUrl(item.image)
 
   async function handleCategoryChange(next: typeof category) {
@@ -16,6 +17,10 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
 
   async function handleNameBlur() {
     await updateItem(item.id, { name })
+  }
+
+  async function handlePurchasedFromBlur() {
+    await updateItem(item.id, { purchasedFrom })
   }
 
   async function handleDelete() {
@@ -35,6 +40,13 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
           value={name}
           onChange={(e) => setName(e.target.value)}
           onBlur={handleNameBlur}
+        />
+        <input
+          className="text-input"
+          placeholder="Bought at (optional)"
+          value={purchasedFrom}
+          onChange={(e) => setPurchasedFrom(e.target.value)}
+          onBlur={handlePurchasedFromBlur}
         />
         <button className="btn danger" onClick={handleDelete}>
           Delete

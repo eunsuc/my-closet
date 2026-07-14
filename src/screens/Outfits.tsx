@@ -36,9 +36,11 @@ export default function Outfits() {
               onClick={() => setSelected(outfit)}
             >
               <OutfitPreview
+                hat={outfit.hatId ? items.get(outfit.hatId) : undefined}
                 dress={outfit.dressId ? items.get(outfit.dressId) : undefined}
-                shirt={outfit.shirtId ? items.get(outfit.shirtId) : undefined}
-                skirt={outfit.skirtId ? items.get(outfit.skirtId) : undefined}
+                top={outfit.topId ? items.get(outfit.topId) : undefined}
+                bottom={outfit.bottomId ? items.get(outfit.bottomId) : undefined}
+                shoes={outfit.shoesId ? items.get(outfit.shoesId) : undefined}
               />
               {outfit.name && <div className="outfit-card-name">{outfit.name}</div>}
             </button>

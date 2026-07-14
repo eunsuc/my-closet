@@ -1,31 +1,35 @@
 import { useBlobUrl } from '../hooks/useBlobUrl'
 import type { Item } from '../types'
 
-function Band({ item }: { item?: Item }) {
+function Band({ item, accessory }: { item?: Item; accessory?: boolean }) {
   const url = useBlobUrl(item?.thumbnail)
-  return <div className="outfit-card-preview-band">{url && <img src={url} alt="" />}</div>
+  if (!item) return null
+  return (
+    <div className={'outfit-card-preview-band' + (accessory ? ' accessory' : '')}>
+      {url && <img src={url} alt="" />}
+    </div>
+  )
 }
 
 export function OutfitPreview({
+  hat,
   dress,
-  shirt,
-  skirt,
+  top,
+  bottom,
+  shoes,
 }: {
+  hat?: Item
   dress?: Item
-  shirt?: Item
-  skirt?: Item
+  top?: Item
+  bottom?: Item
+  shoes?: Item
 }) {
-  if (dress) {
-    return (
-      <div className="outfit-card-preview dress">
-        <Band item={dress} />
-      </div>
-    )
-  }
   return (
     <div className="outfit-card-preview">
-      <Band item={shirt} />
-      <Band item={skirt} />
+      <Band item={hat} accessory />
+      {dress ? <Band item={dress} /> : <Band item={top} />}
+      {!dress && <Band item={bottom} />}
+      <Band item={shoes} accessory />
     </div>
   )
 }

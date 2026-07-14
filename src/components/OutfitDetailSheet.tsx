@@ -30,9 +30,11 @@ export function OutfitDetailSheet({
         <div className="sheet-title">{outfit.name || 'Outfit'}</div>
         <div className="sheet-preview" style={{ aspectRatio: '3/4' }}>
           <OutfitPreview
+            hat={outfit.hatId ? items.get(outfit.hatId) : undefined}
             dress={outfit.dressId ? items.get(outfit.dressId) : undefined}
-            shirt={outfit.shirtId ? items.get(outfit.shirtId) : undefined}
-            skirt={outfit.skirtId ? items.get(outfit.skirtId) : undefined}
+            top={outfit.topId ? items.get(outfit.topId) : undefined}
+            bottom={outfit.bottomId ? items.get(outfit.bottomId) : undefined}
+            shoes={outfit.shoesId ? items.get(outfit.shoesId) : undefined}
           />
         </div>
         <input

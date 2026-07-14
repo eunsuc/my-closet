@@ -18,11 +18,15 @@ export function Band({
   index,
   onIndexChange,
   emptyLabel,
+  noneLabel,
+  accessory,
 }: {
-  items: Item[]
+  items: (Item | null)[]
   index: number
   onIndexChange: (next: number) => void
   emptyLabel: string
+  noneLabel?: string
+  accessory?: boolean
 }) {
   const [dragX, setDragX] = useState(0)
   const dragging = useRef(false)
@@ -30,7 +34,7 @@ export function Band({
 
   if (items.length === 0) {
     return (
-      <div className="band">
+      <div className={'band' + (accessory ? ' accessory' : '')}>
         <div className="band-empty">{emptyLabel}</div>
       </div>
     )
@@ -62,7 +66,7 @@ export function Band({
 
   return (
     <div
-      className="band"
+      className={'band' + (accessory ? ' accessory' : '')}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -80,7 +84,7 @@ export function Band({
           justifyContent: 'center',
         }}
       >
-        <BandImage item={current} />
+        {current ? <BandImage item={current} /> : <div className="band-none">{noneLabel}</div>}
       </div>
       {items.length > 1 && (
         <div className="band-indicator">

@@ -7,6 +7,7 @@ import type { Category } from '../types'
 export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => void }) {
   const [category, setCategory] = useState<Category | null>(null)
   const [name, setName] = useState('')
+  const [purchasedFrom, setPurchasedFrom] = useState('')
   const [saving, setSaving] = useState(false)
   const cropperRef = useRef<ImageCropperHandle>(null)
 
@@ -14,7 +15,7 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
     if (!category || saving) return
     setSaving(true)
     const croppedImage = (await cropperRef.current?.getCroppedBlob()) ?? image
-    await addItem(croppedImage, category, name)
+    await addItem(croppedImage, category, name, purchasedFrom)
     setSaving(false)
     onClose()
   }
@@ -30,6 +31,12 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
           placeholder="Name (optional)"
           value={name}
           onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          className="text-input"
+          placeholder="Bought at (optional)"
+          value={purchasedFrom}
+          onChange={(e) => setPurchasedFrom(e.target.value)}
         />
         <button className="btn" disabled={!category || saving} onClick={handleSave}>
           {saving ? 'Saving…' : 'Save'}

@@ -1,9 +1,11 @@
 import type { Category } from '../types'
 
 const OPTIONS: { value: Category; label: string }[] = [
+  { value: 'hat', label: 'Hat' },
+  { value: 'top', label: 'Top' },
+  { value: 'bottom', label: 'Bottom' },
   { value: 'dress', label: 'Dress' },
-  { value: 'shirt', label: 'Shirt' },
-  { value: 'skirt', label: 'Skirt' },
+  { value: 'shoes', label: 'Shoes' },
 ]
 
 export function CategoryPicker({

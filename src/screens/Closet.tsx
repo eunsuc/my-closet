@@ -9,9 +9,11 @@ import type { Category, Item } from '../types'
 
 const FILTERS: { value: Category | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
+  { value: 'hat', label: 'Hats' },
+  { value: 'top', label: 'Tops' },
+  { value: 'bottom', label: 'Bottoms' },
   { value: 'dress', label: 'Dresses' },
-  { value: 'shirt', label: 'Shirts' },
-  { value: 'skirt', label: 'Skirts' },
+  { value: 'shoes', label: 'Shoes' },
 ]
 
 function ItemThumb({ item, onClick }: { item: Item; onClick: () => void }) {

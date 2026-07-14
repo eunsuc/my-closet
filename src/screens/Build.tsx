@@ -3,20 +3,28 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { Band } from '../components/Band'
 import { saveOutfit } from '../lib/repo'
-import type { Outfit } from '../types'
+import type { Item } from '../types'
 
-type Mode = 'separates' | 'dresses'
+type Mode = 'separates' | 'dress'
+
+function withNone(items: Item[]): (Item | null)[] {
+  return items.length ? [null, ...items] : []
+}
 
 export default function Build() {
   const [mode, setMode] = useState<Mode>('separates')
-  const [shirtIndex, setShirtIndex] = useState(0)
-  const [skirtIndex, setSkirtIndex] = useState(0)
+  const [hatIndex, setHatIndex] = useState(0)
+  const [topIndex, setTopIndex] = useState(0)
+  const [bottomIndex, setBottomIndex] = useState(0)
   const [dressIndex, setDressIndex] = useState(0)
+  const [shoesIndex, setShoesIndex] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
 
-  const shirts = useLiveQuery(() => db.items.where('category').equals('shirt').toArray()) ?? []
-  const skirts = useLiveQuery(() => db.items.where('category').equals('skirt').toArray()) ?? []
+  const hats = useLiveQuery(() => db.items.where('category').equals('hat').toArray()) ?? []
+  const tops = useLiveQuery(() => db.items.where('category').equals('top').toArray()) ?? []
+  const bottoms = useLiveQuery(() => db.items.where('category').equals('bottom').toArray()) ?? []
   const dresses = useLiveQuery(() => db.items.where('category').equals('dress').toArray()) ?? []
+  const shoes = useLiveQuery(() => db.items.where('category').equals('shoes').toArray()) ?? []
   const outfits = useLiveQuery(() => db.outfits.toArray()) ?? []
 
   useEffect(() => {
@@ -25,25 +33,37 @@ export default function Build() {
     return () => clearTimeout(t)
   }, [toast])
 
-  const currentShirt = shirts.length ? shirts[shirtIndex % shirts.length] : undefined
-  const currentSkirt = skirts.length ? skirts[skirtIndex % skirts.length] : undefined
-  const currentDress = dresses.length ? dresses[dressIndex % dresses.length] : undefined
+  const hatsWithNone = withNone(hats)
+  const shoesWithNone = withNone(shoes)
 
-  const candidate: Pick<Outfit, 'dressId' | 'shirtId' | 'skirtId'> =
-    mode === 'dresses'
-      ? { dressId: currentDress?.id }
-      : { shirtId: currentShirt?.id, skirtId: currentSkirt?.id }
+  const currentHat = hatsWithNone.length ? hatsWithNone[hatIndex % hatsWithNone.length] : undefined
+  const currentTop = tops.length ? tops[topIndex % tops.length] : undefined
+  const currentBottom = bottoms.length ? bottoms[bottomIndex % bottoms.length] : undefined
+  const currentDress = dresses.length ? dresses[dressIndex % dresses.length] : undefined
+  const currentShoes = shoesWithNone.length
+    ? shoesWithNone[shoesIndex % shoesWithNone.length]
+    : undefined
+
+  const candidate = {
+    hatId: currentHat?.id,
+    topId: mode === 'separates' ? currentTop?.id : undefined,
+    bottomId: mode === 'separates' ? currentBottom?.id : undefined,
+    dressId: mode === 'dress' ? currentDress?.id : undefined,
+    shoesId: currentShoes?.id,
+  }
 
   const isComplete =
-    mode === 'dresses' ? !!candidate.dressId : !!candidate.shirtId && !!candidate.skirtId
+    mode === 'dress' ? !!candidate.dressId : !!candidate.topId && !!candidate.bottomId
 
   const isDuplicate =
     isComplete &&
     outfits.some(
       (o) =>
+        o.hatId === candidate.hatId &&
+        o.topId === candidate.topId &&
+        o.bottomId === candidate.bottomId &&
         o.dressId === candidate.dressId &&
-        o.shirtId === candidate.shirtId &&
-        o.skirtId === candidate.skirtId,
+        o.shoesId === candidate.shoesId,
     )
 
   async function handleSave() {
@@ -64,8 +84,8 @@ export default function Build() {
             Separates
           </button>
           <button
-            className={'mode-toggle-btn' + (mode === 'dresses' ? ' active' : '')}
-            onClick={() => setMode('dresses')}
+            className={'mode-toggle-btn' + (mode === 'dress' ? ' active' : '')}
+            onClick={() => setMode('dress')}
           >
             Dresses
           </button>
@@ -73,19 +93,28 @@ export default function Build() {
       </div>
 
       <div className="build-stage">
+        <Band
+          items={hatsWithNone}
+          index={hatIndex}
+          onIndexChange={setHatIndex}
+          emptyLabel="No hats yet"
+          noneLabel="No hat"
+          accessory
+        />
+
         {mode === 'separates' ? (
           <>
             <Band
-              items={shirts}
-              index={shirtIndex}
-              onIndexChange={setShirtIndex}
-              emptyLabel="No shirts yet — add some in Closet"
+              items={tops}
+              index={topIndex}
+              onIndexChange={setTopIndex}
+              emptyLabel="No tops yet — add some in Closet"
             />
             <Band
-              items={skirts}
-              index={skirtIndex}
-              onIndexChange={setSkirtIndex}
-              emptyLabel="No skirts yet — add some in Closet"
+              items={bottoms}
+              index={bottomIndex}
+              onIndexChange={setBottomIndex}
+              emptyLabel="No bottoms yet — add some in Closet"
             />
           </>
         ) : (
@@ -96,6 +125,15 @@ export default function Build() {
             emptyLabel="No dresses yet — add some in Closet"
           />
         )}
+
+        <Band
+          items={shoesWithNone}
+          index={shoesIndex}
+          onIndexChange={setShoesIndex}
+          emptyLabel="No shoes yet"
+          noneLabel="No shoes"
+          accessory
+        />
       </div>
 
       <button className="save-fab" disabled={!isComplete || isDuplicate} onClick={handleSave}>
