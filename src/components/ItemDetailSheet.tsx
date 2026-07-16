@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useBlobUrl } from '../hooks/useBlobUrl'
 import { CategoryPicker } from './CategoryPicker'
 import { ColorPicker } from './ColorPicker'
 import { ImageCropper, type ImageCropperHandle } from './ImageCropper'
 import { updateItem, deleteItem, recropItem } from '../lib/repo'
+import { sampleColorAt } from '../lib/color'
 import type { Item } from '../types'
 
 export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => void }) {
@@ -40,6 +41,14 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
     await updateItem(item.id, { color: hex })
   }
 
+  // Backfill a color for items saved before this feature existed, sampling the
+  // center of the already-cropped saved photo (no crop insets to account for here).
+  useEffect(() => {
+    if (item.color) return
+    sampleColorAt(item.image, 0.5, 0.5).then(handleColorChange)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   async function handleDelete() {
     await deleteItem(item.id)
     onClose()
@@ -64,7 +73,7 @@ export function ItemDetailSheet({ item, onClose }: { item: Item; onClose: () => 
 
         {recropping ? (
           <>
-            <ImageCropper ref={cropperRef} image={currentImage} />
+            <ImageCropper ref={cropperRef} image={currentImage} onCenterColorChange={handleColorChange} />
             <button className="btn" disabled={savingCrop} onClick={handleApplyCrop}>
               {savingCrop ? 'Saving…' : 'Apply crop'}
             </button>

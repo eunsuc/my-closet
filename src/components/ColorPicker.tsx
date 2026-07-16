@@ -1,6 +1,5 @@
-import { useEffect } from 'react'
 import { useBlobUrl } from '../hooks/useBlobUrl'
-import { extractDominantColor, sampleColorAt } from '../lib/color'
+import { sampleColorAt } from '../lib/color'
 
 export function ColorPicker({
   image,
@@ -12,11 +11,6 @@ export function ColorPicker({
   onChange: (hex: string) => void
 }) {
   const url = useBlobUrl(image)
-
-  useEffect(() => {
-    if (color) return
-    extractDominantColor(image).then(onChange)
-  }, [image, color, onChange])
 
   function handleTap(e: React.MouseEvent<HTMLImageElement>) {
     const img = e.currentTarget

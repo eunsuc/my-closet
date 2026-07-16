@@ -7,8 +7,9 @@ import type { Item } from '../types'
 
 type Mode = 'separates' | 'dress'
 
-const MAX_PAIRED_WIDTH = 0.6
-const MIN_PAIRED_WIDTH = 0.15
+const BOTTOM_TO_TOP_RATIO = 1.5
+const MAX_TOP_WIDTH = 0.5
+const MIN_TOP_WIDTH = 0.12
 
 function withNone(items: Item[]): (Item | null)[] {
   return items.length ? [null, ...items] : []
@@ -75,10 +76,9 @@ export default function Build() {
   const topAspect = useImageAspect(currentTop)
   const bottomAspect = useImageAspect(currentBottom)
 
-  // Top and Bottom share a fixed width so they align like a paper doll, but that
-  // width must never make either image taller than the band actually is — so it's
-  // computed from the real band height and each image's real aspect ratio, capped
-  // at MAX_PAIRED_WIDTH and floored at MIN_PAIRED_WIDTH so it's never illegibly tiny.
+  // Bottom is always BOTTOM_TO_TOP_RATIO times Top's width, but neither may exceed
+  // what actually fits within the band's real height for its own real aspect ratio —
+  // so topWidth is solved from both constraints at once, and bottomWidth follows.
   useEffect(() => {
     const el = topBandRef.current
     if (!el) return
@@ -94,17 +94,21 @@ export default function Build() {
     return () => observer.disconnect()
   }, [mode])
 
-  const pairedWidth = useMemo(() => {
-    if (!pairedBandSize) return MAX_PAIRED_WIDTH
-    const safeFractions: number[] = []
-    for (const aspect of [topAspect, bottomAspect]) {
-      if (!aspect) continue
-      const widthForFullHeight = (pairedBandSize.h * aspect) / pairedBandSize.w
-      safeFractions.push(widthForFullHeight)
+  const topWidth = useMemo(() => {
+    if (!pairedBandSize) return MAX_TOP_WIDTH
+    let maxTop = MAX_TOP_WIDTH
+    if (topAspect) {
+      const safeTop = (pairedBandSize.h * topAspect) / pairedBandSize.w
+      maxTop = Math.min(maxTop, safeTop)
     }
-    if (safeFractions.length === 0) return MAX_PAIRED_WIDTH
-    return Math.min(MAX_PAIRED_WIDTH, Math.max(MIN_PAIRED_WIDTH, Math.min(...safeFractions)))
+    if (bottomAspect) {
+      const safeBottom = (pairedBandSize.h * bottomAspect) / pairedBandSize.w
+      maxTop = Math.min(maxTop, safeBottom / BOTTOM_TO_TOP_RATIO)
+    }
+    return Math.max(MIN_TOP_WIDTH, maxTop)
   }, [pairedBandSize, topAspect, bottomAspect])
+
+  const bottomWidth = topWidth * BOTTOM_TO_TOP_RATIO
 
   const candidate = {
     hatId: currentHat?.id,
@@ -172,13 +176,13 @@ export default function Build() {
               items={tops}
               onIndexChange={setTopIndex}
               emptyLabel="No tops yet — add some in Closet"
-              matchWidth={pairedWidth}
+              matchWidth={topWidth}
             />
             <Band
               items={bottoms}
               onIndexChange={setBottomIndex}
               emptyLabel="No bottoms yet — add some in Closet"
-              matchWidth={pairedWidth}
+              matchWidth={bottomWidth}
             />
           </>
         ) : (

@@ -2,37 +2,6 @@ function rgbToHex(r: number, g: number, b: number): string {
   return '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')
 }
 
-export async function extractDominantColor(image: Blob): Promise<string> {
-  const bitmap = await createImageBitmap(image)
-  const maxDim = 100
-  const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height))
-  const canvas = document.createElement('canvas')
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale))
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale))
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })
-  if (!ctx) {
-    bitmap.close()
-    return '#cccccc'
-  }
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-  bitmap.close()
-
-  const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  let r = 0
-  let g = 0
-  let b = 0
-  let count = 0
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] < 128) continue // skip transparent background pixels
-    r += data[i]
-    g += data[i + 1]
-    b += data[i + 2]
-    count++
-  }
-  if (count === 0) return '#cccccc'
-  return rgbToHex(Math.round(r / count), Math.round(g / count), Math.round(b / count))
-}
-
 export async function sampleColorAt(image: Blob, xFrac: number, yFrac: number): Promise<string> {
   const bitmap = await createImageBitmap(image)
   const canvas = document.createElement('canvas')

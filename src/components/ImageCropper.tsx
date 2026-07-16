@@ -1,5 +1,6 @@
-import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useBlobUrl } from '../hooks/useBlobUrl'
+import { sampleColorAt } from '../lib/color'
 
 interface Insets {
   top: number
@@ -19,10 +20,10 @@ export interface ImageCropperHandle {
   getCroppedBlob: () => Promise<Blob>
 }
 
-export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(function ImageCropper(
-  { image },
-  ref,
-) {
+export const ImageCropper = forwardRef<
+  ImageCropperHandle,
+  { image: Blob; onCenterColorChange?: (hex: string) => void }
+>(function ImageCropper({ image, onCenterColorChange }, ref) {
   const [baseImage, setBaseImage] = useState(image)
   const url = useBlobUrl(baseImage)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -91,6 +92,20 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
     measure()
   }
 
+  function reportCenterColor(currentInsets: Insets) {
+    if (!onCenterColorChange) return
+    const centerX = currentInsets.left + (1 - currentInsets.left - currentInsets.right) / 2
+    const centerY = currentInsets.top + (1 - currentInsets.top - currentInsets.bottom) / 2
+    sampleColorAt(baseImage, centerX, centerY).then(onCenterColorChange)
+  }
+
+  // Report the color at the center of the crop whenever the base image changes
+  // (initial load, or after a rotation bakes in and resets the crop to zero).
+  useEffect(() => {
+    reportCenterColor(insets)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseImage])
+
   async function commitRotation() {
     if (previewAngle === 0 || rotating) return
     setRotating(true)
@@ -157,11 +172,15 @@ export const ImageCropper = forwardRef<ImageCropperHandle, { image: Blob }>(func
   }
 
   function handlePointerUp() {
-    dragState.current = null
+    if (dragState.current) {
+      dragState.current = null
+      reportCenterColor(insets)
+    }
   }
 
   function resetCrop() {
     setInsets(ZERO_INSETS)
+    reportCenterColor(ZERO_INSETS)
   }
 
   const hasCrop = insets.top > 0 || insets.right > 0 || insets.bottom > 0 || insets.left > 0

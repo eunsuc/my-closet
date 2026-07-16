@@ -34,7 +34,7 @@ export function ImportSheet({ image, onClose }: { image: Blob; onClose: () => vo
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-title">New item</div>
-        <ImageCropper ref={cropperRef} image={image} />
+        <ImageCropper ref={cropperRef} image={image} onCenterColorChange={setColor} />
         <CategoryPicker value={category} onChange={setCategory} />
         <input
           className="text-input"
