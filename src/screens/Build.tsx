@@ -80,13 +80,18 @@ export default function Build() {
   // computed from the real band height and each image's real aspect ratio, capped
   // at MAX_PAIRED_WIDTH and floored at MIN_PAIRED_WIDTH so it's never illegibly tiny.
   useEffect(() => {
-    function measure() {
-      const el = topBandRef.current
-      if (el) setPairedBandSize({ w: el.clientWidth, h: el.clientHeight })
-    }
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
+    const el = topBandRef.current
+    if (!el) return
+    // ResizeObserver catches every layout change to the band's box — not just
+    // window resizes, but also the flex reflow that happens as hat/shoes/bag
+    // data loads in asynchronously and shifts how much height Top/Bottom get.
+    // A plain 'resize' listener misses that, so the measurement could go stale.
+    const observer = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect
+      setPairedBandSize({ w: width, h: height })
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [mode])
 
   const pairedWidth = useMemo(() => {
